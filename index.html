@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUD-X | Cognitive Tasks, Focus Core, Smart Step Exam & Study Vault</title>
+    <meta name="description" content="STUD-X: Futuristic Cockpit for Daily Tasks, Focus Timers, Smart Step-Marking Photo Exam Engine, and Class Vault (PPTs, Assignments, Notes).">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- PDF.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="theme-arc-cyan">
+
+    <!-- Holographic Particle & Grid Canvas -->
+    <canvas id="bgCanvas"></canvas>
+    <div class="scanlines"></div>
+
+    <!-- Master Layout -->
+    <div class="hud-layout">
+
+        <!-- Top Header & Telemetry -->
+        <header class="hud-header">
+            <div class="brand-section">
+                <div class="arc-reactor-logo" title="STUD-X Core Synchronized">
+                    <div class="arc-inner-ring"></div>
+                    <div class="arc-core"></div>
+                </div>
+                <div class="brand-titles">
+                    <h1>STUD-<span>X</span></h1>
+                    <div class="brand-subtitle">BE THE BEST</div>
+                </div>
+            </div>
+
+            <!-- Live 12-Hour Telemetry Stats -->
+            <div class="telemetry-bar">
+                <div class="telemetry-item">
+                    <span class="telemetry-label">SYSTEM CLOCK (12H)</span>
+                    <span class="telemetry-value" id="hudTelemetryClock">12:00:00 PM</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">ACTIVE STREAK</span>
+                    <span class="telemetry-value" id="telemetryStreak">0 🔥</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">TASKS DONE</span>
+                    <span class="telemetry-value" id="telemetryCompletedTasks">0/0</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-label">FOCUS TIME</span>
+                    <span class="telemetry-value" id="telemetryFocusTotal">0m</span>
+                </div>
+            </div>
+
+            <!-- System Controls -->
+            <div class="header-controls">
+                <button class="pilot-hud-badge-btn" id="pilotHudBtn" title="Pilot Dossier & Account Matrix">
+                    <div class="pilot-badge-avatar" style="border-color: #00f0ff; box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);">
+                        <i data-lucide="zap" style="color: #00f0ff;"></i>
+                    </div>
+                    <div class="pilot-badge-info">
+                        <div class="pilot-badge-top">
+                            <span class="pilot-callsign">CADET-01</span>
+                            <span class="pilot-level-tag">LVL 1</span>
+                        </div>
+                        <div class="pilot-xp-bar-bg">
+                            <div class="pilot-xp-bar-fill" style="width: 20%; background: #00f0ff;"></div>
+                        </div>
+                    </div>
+                </button>
+
+                <select class="hud-select" id="themeSelector" title="Switch Theme">
+                    <option value="arc-cyan">⚡ Arc Cyan HUD</option>
+                    <option value="cyber-crimson">🔥 Cyber Crimson</option>
+                    <option value="matrix-green">🟢 Matrix Emerald</option>
+                    <option value="violet-pulse">💜 Violet Pulse</option>
+                </select>
+
+                <button class="hud-btn-mini" id="toggleSoundBtn" title="Toggle Synthesized HUD Sound FX">
+                    <i data-lucide="volume-2"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Primary Navigation -->
+        <nav class="hud-nav">
+            <button class="nav-link active" data-tab="tasks">
+                <i data-lucide="check-square"></i> TASK MATRIX
+            </button>
+            <button class="nav-link" data-tab="timer">
+                <i data-lucide="timer"></i> FOCUS CORE
+            </button>
+            <button class="nav-link" data-tab="exam">
+                <i data-lucide="file-text"></i> EXAM ARENA
+            </button>
+            <button class="nav-link" data-tab="vault">
+                <i data-lucide="folder-archive"></i> STUD-X VAULT
+            </button>
+            <button class="nav-link" data-tab="history">
+                <i data-lucide="bar-chart-2"></i> TELEMETRY LOGS
+            </button>
+        </nav>
+
+        <!-- =================================================================
+             VIEW 1: TASK MATRIX
+             ================================================================= -->
+        <main class="app-view" id="view-tasks">
+            <div class="hud-panel">
+                <div class="panel-header-row">
+                    <h2 class="panel-title"><i data-lucide="layers"></i> DAILY DIRECTIVES & TASK MATRIX</h2>
+                    <span class="brand-subtitle" id="hudTelemetryDate">TODAY</span>
+                </div>
+
+                <div class="task-grid-layout">
+                    <!-- Task Creation Panel -->
+                    <aside class="task-form-panel">
+                        <h3 class="panel-title" style="font-size: 1rem;"><i data-lucide="plus-circle"></i> NEW DIRECTIVE</h3>
+                        
+                        <form id="addTaskForm">
+                            <div class="form-group">
+                                <label>TASK TITLE / OBJECTIVE</label>
+                                <input type="text" id="taskTitleInput" class="hud-input" placeholder="e.g. Solve Quantum Derivations & Wave Equations" required>
+                            </div>
+
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>CATEGORY</label>
+                                    <select id="taskCategoryInput" class="hud-input">
+                                        <option value="Study">📚 Study</option>
+                                        <option value="Exam Prep">📝 Exam Prep</option>
+                                        <option value="Coding">💻 Coding</option>
+                                        <option value="Fitness">⚡ Fitness</option>
+                                        <option value="General">🎯 General</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>PRIORITY</label>
+                                    <select id="taskPriorityInput" class="hud-input">
+                                        <option value="urgent">🔴 Urgent</option>
+                                        <option value="high">🟠 High</option>
+                                        <option value="medium" selected>🔵 Medium</option>
+                                        <option value="low">⚪ Low</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>DEADLINE DATE</label>
+                                    <input type="date" id="taskDueDateInput" class="hud-input">
+                                </div>
+                                <div class="form-group">
+                                    <label>DUE TIME</label>
+                                    <input type="time" id="taskDueTimeInput" class="hud-input">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-hud-primary" style="width: 100%; margin-top: 6px;">
+                                <i data-lucide="plus"></i> INITIALIZE DIRECTIVE
+                            </button>
+                        </form>
+
+                        <!-- Task Completion Progress -->
+                        <div class="task-progress-tracker">
+                            <div class="progress-header">
+                                <span>COMPLETION STATUS</span>
+                                <span id="taskProgressText">0% COMPLETED</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="taskProgressBar"></div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Task List & Filters -->
+                    <section class="task-list-section">
+                        <div class="task-controls-bar">
+                            <div class="task-filters">
+                                <button class="filter-btn active" data-filter="all">ALL</button>
+                                <button class="filter-btn" data-filter="today">TODAY</button>
+                                <button class="filter-btn" data-filter="pending">PENDING</button>
+                                <button class="filter-btn" data-filter="completed">COMPLETED</button>
+                            </div>
+
+                            <select id="categoryFilterSelect" class="hud-select">
+                                <option value="all">Filter: All Categories</option>
+                                <option value="Study">Category: Study</option>
+                                <option value="Exam Prep">Category: Exam Prep</option>
+                                <option value="Coding">Category: Coding</option>
+                                <option value="Fitness">Category: Fitness</option>
+                                <option value="General">Category: General</option>
+                            </select>
+                        </div>
+
+                        <!-- Active Tasks Container -->
+                        <div class="task-list" id="taskListContainer">
+                            <!-- Injected by tasks.js -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <!-- =================================================================
+             VIEW 2: FOCUS CORE & TIMERS
+             ================================================================= -->
+        <main class="app-view" id="view-timer" style="display: none;">
+            <div class="hud-panel">
+                <div class="panel-header-row">
+                    <h2 class="panel-title"><i data-lucide="cpu"></i> FOCUS CORE & TEMPORAL ENGINE</h2>
+                    <div class="brand-subtitle">TEMPORAL FREQUENCY STABILIZED</div>
+                </div>
+
+                <div class="focus-core-layout">
+                    <!-- Left: Circular Timer Dial -->
+                    <div class="timer-main-dial">
+                        <div class="timer-ring-container">
+                            <svg class="timer-svg" viewBox="0 0 300 300">
+                                <circle class="timer-bg-circle" cx="150" cy="150" r="135"></circle>
+                                <circle class="timer-progress-circle" id="timerProgressRing" cx="150" cy="150" r="135"></circle>
+                            </svg>
+                            <div class="timer-inner-hud">
+                                <span class="timer-status-label" id="timerStatusLabel">FOCUS PROTOCOL</span>
+                                <div class="timer-digits" id="timerDigits">25:00</div>
+                            </div>
+                        </div>
+
+                        <!-- Active Attached Task Banner -->
+                        <div class="timer-active-task" id="timerActiveTaskBanner"></div>
+
+                        <!-- Primary Controls -->
+                        <div class="timer-controls-row">
+                            <button class="btn-hud-primary btn-timer-main" id="timerToggleBtn" onclick="focusTimer.toggle()">
+                                <i data-lucide="play"></i> START CORE
+                            </button>
+                            <button class="btn-hud-secondary btn-timer-main" onclick="focusTimer.reset()">
+                                <i data-lucide="rotate-ccw"></i> RESET
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Mode Switchers & Ambient Generator -->
+                    <div class="focus-side-panel">
+                        <div class="timer-modes-switcher">
+                            <button class="timer-mode-btn active" data-mode="pomodoro" onclick="focusTimer.setMode('pomodoro')">
+                                <i data-lucide="clock"></i> Pomodoro
+                            </button>
+                            <button class="timer-mode-btn" data-mode="custom" onclick="focusTimer.setMode('custom')">
+                                <i data-lucide="sliders"></i> Custom
+                            </button>
+                            <button class="timer-mode-btn" data-mode="stopwatch" onclick="focusTimer.setMode('stopwatch')">
+                                <i data-lucide="activity"></i> Stopwatch
+                            </button>
+                        </div>
+
+                        <!-- Pomodoro Sub Controls -->
+                        <div id="pomodoroSubControls" class="pomo-sub-tabs">
+                            <button class="pomo-state-btn active" data-state="work" onclick="focusTimer.setPomoState('work')">
+                                🎯 Focus (25m)
+                            </button>
+                            <button class="pomo-state-btn" data-state="shortBreak" onclick="focusTimer.setPomoState('shortBreak')">
+                                ☕ Short Break (5m)
+                            </button>
+                            <button class="pomo-state-btn" data-state="longBreak" onclick="focusTimer.setPomoState('longBreak')">
+                                ⚡ Long Break (15m)
+                            </button>
+                        </div>
+
+                        <!-- Custom Timer Preset Controls -->
+                        <div id="customTimerControls" style="display: none;">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>MINUTES</label>
+                                    <input type="number" id="customMinutesInput" class="hud-input" value="30" min="0" max="600" onchange="focusTimer.updateCustomDurationFromInputs()">
+                                </div>
+                                <div class="form-group">
+                                    <label>SECONDS</label>
+                                    <input type="number" id="customSecondsInput" class="hud-input" value="0" min="0" max="59" onchange="focusTimer.updateCustomDurationFromInputs()">
+                                </div>
+                            </div>
+                            <div class="preset-pills">
+                                <button class="preset-pill" onclick="focusTimer.setCustomPreset(15)">15 Min</button>
+                                <button class="preset-pill" onclick="focusTimer.setCustomPreset(30)">30 Min</button>
+                                <button class="preset-pill" onclick="focusTimer.setCustomPreset(45)">45 Min</button>
+                                <button class="preset-pill" onclick="focusTimer.setCustomPreset(60)">60 Min</button>
+                                <button class="preset-pill" onclick="focusTimer.setCustomPreset(90)">90 Min</button>
+                                <button class="preset-pill" onclick="focusTimer.setCustomPreset(120)">120 Min</button>
+                            </div>
+                        </div>
+
+                        <!-- Stopwatch Sub Controls -->
+                        <div id="stopwatchControls" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="font-family: var(--font-heading); font-size: 0.85rem; color: var(--text-muted);">TELEMETRY SPLITS</label>
+                                <button class="btn-hud-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="focusTimer.recordLap()">
+                                    <i data-lucide="flag"></i> RECORD SPLIT
+                                </button>
+                            </div>
+                            <div class="laps-container" id="stopwatchLapsList">
+                                <div class="lap-item-empty">No telemetry splits recorded yet.</div>
+                            </div>
+                        </div>
+
+                        <!-- Web Audio Ambient Soundscapes Generator -->
+                        <div class="ambient-box">
+                            <label style="font-family: var(--font-heading); font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                                <i data-lucide="headphones"></i> PROCEDURAL FOCUS SOUNDSCAPES
+                            </label>
+                            <div class="ambient-grid">
+                                <button class="ambient-btn active" data-ambient="none" onclick="focusTimer.setAmbient('none')">
+                                    <i data-lucide="volume-x"></i> Mute Ambient
+                                </button>
+                                <button class="ambient-btn" data-ambient="binaural" onclick="focusTimer.setAmbient('binaural')">
+                                    <i data-lucide="waves"></i> 40Hz Gamma Wave
+                                </button>
+                                <button class="ambient-btn" data-ambient="scifihum" onclick="focusTimer.setAmbient('scifihum')">
+                                    <i data-lucide="zap"></i> Arc Core Hum
+                                </button>
+                                <button class="ambient-btn" data-ambient="rain" onclick="focusTimer.setAmbient('rain')">
+                                    <i data-lucide="cloud-rain"></i> Cyber Rain
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- =================================================================
+             VIEW 3: EXAM ARENA & PHOTO SOLUTION STEP-MARKING
+             ================================================================= -->
+        <main class="app-view" id="view-exam" style="display: none;">
+            
+            <!-- SUB-VIEW 3A: EXAM SETUP & PDF UPLOAD -->
+            <div id="examConfigView" class="hud-panel">
+                <div class="panel-header-row">
+                    <h2 class="panel-title"><i data-lucide="file-check"></i> STUD-X EXAM ARENA & STEP EVALUATOR</h2>
+                    <div class="brand-subtitle">PHOTO SOLUTION CHECKER & PDF PAGE-RANGE ENGINE</div>
+                </div>
+
+                <div class="exam-config-grid">
+                    <!-- Left: Parameters & Upload -->
+                    <div class="task-form-panel">
+                        <div class="form-group">
+                            <label>EXAM TITLE</label>
+                            <input type="text" id="examTitleInput" class="hud-input" value="STUD-X Step Derivation & Mock Assessment" placeholder="e.g. Physics Final Exam or Mock Test #1">
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>DURATION (MINUTES)</label>
+                                <input type="number" id="examDurationInput" class="hud-input" value="30" min="1" max="360">
+                            </div>
+                            <div class="form-group">
+                                <label>MAXIMUM MARKS</label>
+                                <input type="number" id="examMaxMarksInput" class="hud-input" value="50" min="1">
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>MARKS PER QUESTION</label>
+                                <input type="number" id="examMarksPerQInput" class="hud-input" value="10" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>NEGATIVE MARKING (-)</label>
+                                <input type="number" id="examNegativeMarkInput" class="hud-input" value="1" min="0" step="0.25">
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>PASSING PERCENTAGE (%)</label>
+                                <input type="number" id="examPassingPercentInput" class="hud-input" value="40" min="1" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>PDF PAGE RANGE (e.g. 1-4, 3-9)</label>
+                                <input type="text" id="examPageRangeInput" class="hud-input" value="all" placeholder="e.g. 1-4 or 3-9 or all">
+                            </div>
+                        </div>
+
+                        <!-- PDF Upload Box -->
+                        <div class="form-group">
+                            <label>UPLOAD QUESTION PAPER (PDF)</label>
+                            <label class="file-dropzone" for="examPdfFileInput">
+                                <i data-lucide="file-up"></i>
+                                <span style="font-family: var(--font-heading); font-size: 1rem; color: var(--text-main);">Click or Drop PDF Question Paper</span>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">Supports any standard PDF question paper with custom page ranges!</span>
+                                <input type="file" id="examPdfFileInput" accept=".pdf">
+                            </label>
+                            <div id="pdfStatusPreview"></div>
+                        </div>
+
+                        <!-- Exam View Mode -->
+                        <div class="form-group" style="margin-top: 6px;">
+                            <label>EXAM INTERFACE & EVALUATION MODE</label>
+                            <div style="display: flex; gap: 16px; margin-top: 4px; flex-wrap: wrap;">
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
+                                    <input type="radio" name="examModeSelect" value="hybrid" checked> ⚡ Hybrid (Photo Solution Step-Marking + MCQ)
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
+                                    <input type="radio" name="examModeSelect" value="split_pdf"> 📑 Split-View PDF & OMR
+                                </label>
+                            </div>
+                        </div>
+
+                        <button class="btn-hud-primary" style="margin-top: 14px; font-size: 1.1rem; padding: 14px;" onclick="examEngine.startTest()">
+                            <i data-lucide="play-circle"></i> INITIALIZE & LAUNCH EXAM PROTOCOL
+                        </button>
+                    </div>
+
+                    <!-- Right: Sample Mock Exams & Features Guide -->
+                    <div class="sample-exam-selector">
+                        <h3 class="panel-title" style="font-size: 1rem;"><i data-lucide="sparkles"></i> PRE-LOADED STEP EXAMS</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                            Don't have a PDF ready? Click below to instantly load and test the Step-by-Step Marking and Photo Solution Evaluator:
+                        </p>
+
+                        <button class="btn-hud-secondary" style="text-align: left; padding: 12px;" onclick="examEngine.loadSampleExam('physics')">
+                            <strong>⚡ Quantum Mechanics & Wave Derivations Mock</strong>
+                            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">5 Step-Marked Questions • 30 Mins • 50 Marks</div>
+                        </button>
+
+                        <div style="background: rgba(0,0,0,0.35); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-hud); margin-top: 10px;">
+                            <h4 style="font-family: var(--font-heading); font-size: 0.9rem; color: var(--primary); margin-bottom: 6px;">
+                                📸 Step-by-Step Marking Guide:
+                            </h4>
+                            <ul style="font-size: 0.82rem; color: var(--text-muted); padding-left: 18px; line-height: 1.6;">
+                                <li><strong>Photo Solution:</strong> Snap or upload your handwritten page for any question.</li>
+                                <li><strong>Step Rubrics:</strong> Step 1 (Formula), Step 2 (Derivation), Step 3 (Calculation), Step 4 (Units).</li>
+                                <li><strong>PDF Range:</strong> Type <code>1-4</code> or <code>3-9</code> to fetch only target pages.</li>
+                                <li><strong>MCQ Option Selection:</strong> Select A, B, C, D with keyboard <code>1-4</code> or keys <code>A-D</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW 3B: LIVE CBT TEST RUNNER -->
+            <div id="examRunnerView" class="exam-runner-container">
+                <!-- Top Live Status Header -->
+                <div class="exam-live-header">
+                    <div class="exam-title-badge">
+                        <i data-lucide="shield-alert"></i>
+                        <span id="examLiveTitle">STUD-X Assessment in Progress</span>
+                    </div>
+
+                    <div class="exam-timer-box">
+                        <i data-lucide="clock" style="color: var(--primary);"></i>
+                        <span class="timer-digits-live" id="examLiveTimer">30:00</span>
+                    </div>
+
+                    <button class="btn-hud-primary" style="background: rgba(255, 51, 102, 0.2); border-color: var(--danger); color: var(--danger);" onclick="examEngine.promptSubmitTest()">
+                        <i data-lucide="send"></i> FINISH & SUBMIT
+                    </button>
+                </div>
+
+                <!-- Runner Body -->
+                <div class="exam-runner-body">
+                    <!-- Center Question Pane -->
+                    <div class="exam-question-pane">
+                        <div class="q-header-bar">
+                            <span class="q-number-title" id="currentQNumber">QUESTION 1 of 5</span>
+                            <span class="q-marks-pill" id="currentQMarksBadge">Max: +10 Marks</span>
+                        </div>
+
+                        <!-- Split PDF Viewer if split mode enabled -->
+                        <div class="split-pdf-viewer" id="examSplitPdfContainer">
+                            <div class="pdf-page-controls">
+                                <button class="btn-hud-secondary" style="padding: 4px 10px;" onclick="examEngine.prevPdfPage()">
+                                    <i data-lucide="chevron-left"></i> Prev Page
+                                </button>
+                                <span id="pdfViewerPageIndicator" style="color: var(--primary);">Page 1</span>
+                                <button class="btn-hud-secondary" style="padding: 4px 10px;" onclick="examEngine.nextPdfPage()">
+                                    Next Page <i data-lucide="chevron-right"></i>
+                                </button>
+                            </div>
+                            <div id="pdfCanvasViewerTarget"></div>
+                        </div>
+
+                        <!-- Question Text for standard Mode -->
+                        <div id="examCbtQuestionTextContainer">
+                            <div class="q-prompt-text" id="examQuestionText">
+                                Loading Question Telemetry...
+                            </div>
+                        </div>
+
+                        <!-- MCQ Options Choices (A, B, C, D) -->
+                        <div class="options-list" id="examOptionsContainer">
+                            <!-- Injected by exam.js -->
+                        </div>
+
+                        <!-- Photo Solution Upload & Step-Marking Card -->
+                        <div id="photoSolutionContainer">
+                            <!-- Injected dynamically by exam.js -->
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div class="exam-action-bar">
+                            <div class="left-exam-actions">
+                                <button class="btn-hud-secondary" id="examPrevBtn" onclick="examEngine.prevQuestion()">
+                                    <i data-lucide="chevron-left"></i> PREVIOUS
+                                </button>
+                                <button class="btn-hud-secondary" onclick="examEngine.clearResponse()">
+                                    <i data-lucide="x"></i> CLEAR RESPONSE
+                                </button>
+                            </div>
+
+                            <div class="right-exam-actions">
+                                <button class="btn-hud-secondary btn-hud-review" onclick="examEngine.markForReview()">
+                                    <i data-lucide="bookmark"></i> MARK FOR REVIEW & NEXT
+                                </button>
+                                <button class="btn-hud-primary" id="examNextBtn" onclick="examEngine.nextQuestion()">
+                                    SAVE & NEXT <i data-lucide="chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Question Palette Pane -->
+                    <aside class="exam-palette-pane">
+                        <h3 class="panel-title" style="font-size: 1rem;"><i data-lucide="grid"></i> QUESTION PALETTE</h3>
+
+                        <div class="palette-status-legend">
+                            <div class="legend-item"><span class="legend-dot dot-answered"></span> Answered / Photo (<span id="paletteCountAnswered">0</span>)</div>
+                            <div class="legend-item"><span class="legend-dot dot-marked"></span> Review (<span id="paletteCountMarked">0</span>)</div>
+                            <div class="legend-item"><span class="legend-dot dot-not-answered"></span> Unanswered (<span id="paletteCountNotAnswered">0</span>)</div>
+                            <div class="legend-item"><span class="legend-dot dot-not-visited"></span> Not Visited (<span id="paletteCountNotVisited">0</span>)</div>
+                        </div>
+
+                        <div class="palette-grid" id="examQuestionPalette">
+                            <!-- Injected by exam.js -->
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW 3C: RESULTS & TELEMETRY REPORT -->
+            <div id="examResultsView" class="exam-results-container">
+                <div class="results-hero-card">
+                    <div class="rank-badge badge-stark" id="resRankBadge">⚡ STUD-X GENIUS PROTOCOL (GRADE A+)</div>
+                    <h2 style="font-family: var(--font-hud); font-size: 1.5rem;" id="resExamTitle">Mock Exam Performance Assessment</h2>
+                    <div class="results-score-big" id="resScoreDisplay">50 / 50</div>
+                    <div style="font-family: var(--font-heading); font-size: 1.1rem; color: var(--primary);" id="resPercentDisplay">100% ACCURACY</div>
+
+                    <div class="metrics-summary-grid">
+                        <div class="metric-box">
+                            <span class="metric-title">CORRECT / STEP EVALUATED</span>
+                            <span class="metric-val" style="color: var(--success);" id="resCorrectCount">0</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-title">INCORRECT / DEDUCTIONS</span>
+                            <span class="metric-val" style="color: var(--danger);" id="resIncorrectCount">0</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-title">UNATTEMPTED</span>
+                            <span class="metric-val" style="color: var(--text-dim);" id="resUnattemptedCount">0</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-title">TIME TAKEN</span>
+                            <span class="metric-val" style="color: var(--accent);" id="resTimeTaken">0m 0s</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 14px;">
+                        <button class="btn-hud-primary" onclick="examEngine.exitToConfig()">
+                            <i data-lucide="rotate-ccw"></i> TAKE ANOTHER TEST
+                        </button>
+                        <button class="btn-hud-secondary" onclick="window.print()">
+                            <i data-lucide="printer"></i> EXPORT SCORECARD
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Detailed Question Review List -->
+                <div class="hud-panel">
+                    <h3 class="panel-title"><i data-lucide="check-circle-2"></i> DETAILED STEP-BY-STEP QUESTION REVIEW</h3>
+                    <div class="review-list-container" id="examReviewList">
+                        <!-- Injected by exam.js -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- =================================================================
+             VIEW 4: STUD-X VAULT (CLASS PPTS, ASSIGNMENTS, NOTES & QUESTION BANKS)
+             ================================================================= -->
+        <main class="app-view" id="view-vault" style="display: none;">
+            <div class="hud-panel">
+                <div class="panel-header-row">
+                    <h2 class="panel-title"><i data-lucide="folder-archive"></i> STUD-X STUDY VAULT & CLASS REPOSITORY</h2>
+                    <div class="brand-subtitle">INDEXEDDB OFFLINE ARCHIVE</div>
+                </div>
+
+                <div class="vault-layout-grid">
+                    <!-- Left: Upload Directives Panel -->
+                    <aside class="task-form-panel">
+                        <h3 class="panel-title" style="font-size: 1rem;"><i data-lucide="upload"></i> UPLOAD TO VAULT</h3>
+
+                        <form id="addVaultItemForm">
+                            <div class="form-group">
+                                <label>DOCUMENT / ASSIGNMENT TITLE</label>
+                                <input type="text" id="vaultTitleInput" class="hud-input" placeholder="e.g. Electrostatics Lecture 05 Slides" required>
+                            </div>
+
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>SUBJECT / COURSE</label>
+                                    <input type="text" id="vaultSubjectInput" class="hud-input" placeholder="e.g. Physics / Math" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>VAULT CATEGORY</label>
+                                    <select id="vaultCategoryInput" class="hud-input">
+                                        <option value="Class PPTs">📊 Class PPTs</option>
+                                        <option value="Assignments">📝 Assignments</option>
+                                        <option value="Notes / Formulas" selected>📖 Notes / Formulas</option>
+                                        <option value="Question Banks">❓ Question Banks</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>ASSIGNMENT DUE DATE (OPTIONAL)</label>
+                                <input type="date" id="vaultDueDateInput" class="hud-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label>ATTACH FILE (PPT, PPTX, PDF, DOC, IMAGE)</label>
+                                <label class="file-dropzone" for="vaultFileInput" style="padding: 16px;">
+                                    <i data-lucide="paperclip" style="font-size: 1.5rem;"></i>
+                                    <span id="vaultFileLabelText" style="font-size: 0.85rem; color: var(--text-main);">Click to Select File</span>
+                                    <input type="file" id="vaultFileInput" accept=".ppt,.pptx,.pdf,.doc,.docx,.png,.jpg,.jpeg,.txt">
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>NOTES & KEY SUMMARY POINTS</label>
+                                <textarea id="vaultNotesInput" class="hud-input" rows="3" placeholder="Key derivation steps, chapter topics, or submission instructions..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-hud-primary" style="width: 100%; margin-top: 4px;">
+                                <i data-lucide="archive"></i> SECURE TO STUD-X VAULT
+                            </button>
+                        </form>
+                    </aside>
+
+                    <!-- Right: Search, Filter Tabs & File Repository Grid -->
+                    <section class="vault-content-section">
+                        <div class="vault-controls-bar">
+                            <div class="vault-filters">
+                                <button class="vault-filter-btn active" data-category="all">ALL ARCHIVES</button>
+                                <button class="vault-filter-btn" data-category="Class PPTs">📊 CLASS PPTS</button>
+                                <button class="vault-filter-btn" data-category="Assignments">📝 ASSIGNMENTS</button>
+                                <button class="vault-filter-btn" data-category="Notes / Formulas">📖 NOTES & FORMULAS</button>
+                                <button class="vault-filter-btn" data-category="Question Banks">❓ QUESTION BANKS</button>
+                            </div>
+
+                            <input type="text" id="vaultSearchInput" class="hud-input" placeholder="🔍 Search PPTs, notes, subjects..." style="max-width: 260px;">
+                        </div>
+
+                        <!-- Grid of Vault Cards -->
+                        <div class="vault-items-grid" id="vaultItemsGrid">
+                            <!-- Injected by vault.js -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <!-- =================================================================
+             VIEW 5: HISTORY & ANALYTICS
+             ================================================================= -->
+        <main class="app-view" id="view-history" style="display: none;">
+            <div class="hud-panel">
+                <div class="panel-header-row">
+                    <h2 class="panel-title"><i data-lucide="activity"></i> HISTORICAL TELEMETRY & PERFORMANCE LOGS</h2>
+                    <div class="brand-subtitle">PERSISTED LOCAL ARCHIVES</div>
+                </div>
+
+                <div class="history-list" id="historyListContainer">
+                    <!-- Injected by app.js -->
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Vault Item Preview / Lightbox Modal -->
+    <div class="hud-modal-overlay" id="vaultPreviewModal">
+        <div class="hud-modal-box">
+            <div class="hud-modal-header">
+                <h3 id="vaultModalTitle">Vault Document Preview</h3>
+                <button class="btn-close-modal" onclick="studxVault.closeModal()">&times;</button>
+            </div>
+            <div class="hud-modal-body" id="vaultModalContent">
+                <!-- Injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Pilot Identity & Account Management Matrix Modal -->
+    <div class="hud-modal-overlay" id="pilotAuthModal">
+        <div class="hud-modal-box auth-modal-box">
+            <div class="hud-modal-header">
+                <div class="auth-header-title">
+                    <i data-lucide="shield-check"></i>
+                    <div>
+                        <h3 id="authModalHeaderTitle">PILOT IDENTIFICATION MATRIX</h3>
+                        <span class="auth-header-subtitle">Scoped Telemetry, Account Authentication & Data Archives</span>
+                    </div>
+                </div>
+                <button class="btn-close-modal" id="closeAuthModalBtn">&times;</button>
+            </div>
+
+            <!-- Auth Navigation Subtabs -->
+            <div class="auth-subnav">
+                <button class="auth-tab-btn active" data-auth-tab="dossier">
+                    <i data-lucide="user"></i> ACTIVE DOSSIER
+                </button>
+                <button class="auth-tab-btn" data-auth-tab="accounts">
+                    <i data-lucide="users"></i> SWITCH PILOT
+                </button>
+                <button class="auth-tab-btn" data-auth-tab="register">
+                    <i data-lucide="user-plus"></i> NEW PILOT
+                </button>
+                <button class="auth-tab-btn" data-auth-tab="login">
+                    <i data-lucide="log-in"></i> SIGN IN / UNLOCK
+                </button>
+                <button class="auth-tab-btn" data-auth-tab="backup">
+                    <i data-lucide="hard-drive"></i> DATA BACKUP (.STUDX)
+                </button>
+            </div>
+
+            <div class="hud-modal-body auth-modal-body">
+                <!-- TAB 1: ACTIVE PILOT DOSSIER -->
+                <div class="auth-view-tab" id="authTabDossier">
+                    <div class="dossier-hero-card" id="dossierHeroCard">
+                        <!-- Injected by app.js -->
+                    </div>
+
+                    <!-- Telemetry Stats Grid -->
+                    <div class="dossier-stats-grid" id="dossierStatsGrid">
+                        <!-- Injected by app.js -->
+                    </div>
+
+                    <!-- Edit Profile Dossier Form -->
+                    <div class="dossier-edit-section">
+                        <div class="section-title-sm"><i data-lucide="edit-3"></i> MODIFY PILOT CREDENTIALS</div>
+                        <form id="editProfileForm">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>PILOT CALLSIGN</label>
+                                    <input type="text" id="editCallsignInput" class="hud-input" placeholder="e.g. IRON-01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>FULL DISPLAY NAME</label>
+                                    <input type="text" id="editDisplayNameInput" class="hud-input" placeholder="e.g. Tony Stark" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label>DESIGNATION / ROLE</label>
+                                    <input type="text" id="editRoleInput" class="hud-input" placeholder="e.g. Quantum Lead">
+                                </div>
+                                <div class="form-group">
+                                    <label>DEPARTMENT / DIVISION</label>
+                                    <input type="text" id="editDepartmentInput" class="hud-input" placeholder="e.g. Arc Propulsion">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>PILOT AVATAR INSIGNIA</label>
+                                <div class="avatar-selection-grid" id="editAvatarGrid">
+                                    <!-- Injected dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>UPDATE SECURITY PIN / PASSWORD (Optional)</label>
+                                <input type="password" id="editPasswordInput" class="hud-input" placeholder="Leave empty to keep current PIN">
+                            </div>
+
+                            <div class="auth-btn-row">
+                                <button type="submit" class="btn-hud-primary">
+                                    <i data-lucide="check"></i> SAVE PROFILE UPDATES
+                                </button>
+                                <button type="button" class="btn-hud-secondary" id="dossierLogoutBtn">
+                                    <i data-lucide="log-out"></i> LOG OUT PILOT
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- TAB 2: SWITCH PILOT / LOCAL ACCOUNTS -->
+                <div class="auth-view-tab" id="authTabAccounts" style="display: none;">
+                    <div class="section-title-sm"><i data-lucide="users"></i> REGISTERED PILOT PROFILES ON THIS SYSTEM</div>
+                    <div class="accounts-grid" id="accountsListContainer">
+                        <!-- Injected by app.js -->
+                    </div>
+                </div>
+
+                <!-- TAB 3: REGISTER NEW PILOT -->
+                <div class="auth-view-tab" id="authTabRegister" style="display: none;">
+                    <form id="registerPilotForm">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>PILOT USERNAME <span style="color: var(--primary);">*</span></label>
+                                <input type="text" id="regUsernameInput" class="hud-input" placeholder="e.g. peter_parker" required autocomplete="username">
+                            </div>
+                            <div class="form-group">
+                                <label>FULL NAME <span style="color: var(--primary);">*</span></label>
+                                <input type="text" id="regDisplayNameInput" class="hud-input" placeholder="e.g. Peter Parker" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>CALLSIGN (HUD Identifier)</label>
+                                <input type="text" id="regCallsignInput" class="hud-input" placeholder="e.g. SPIDER-01">
+                            </div>
+                            <div class="form-group">
+                                <label>EMAIL ADDRESS (Optional)</label>
+                                <input type="email" id="regEmailInput" class="hud-input" placeholder="e.g. pilot@studx.hud">
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>SPECIALIZATION / ROLE</label>
+                                <input type="text" id="regRoleInput" class="hud-input" placeholder="e.g. Biophysics Scholar">
+                            </div>
+                            <div class="form-group">
+                                <label>DEPARTMENT / FLEET</label>
+                                <input type="text" id="regDepartmentInput" class="hud-input" placeholder="e.g. Quantum Science">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>CHOOSE PILOT AVATAR INSIGNIA <span style="color: var(--primary);">*</span></label>
+                            <div class="avatar-selection-grid" id="regAvatarGrid">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>SECURITY PIN / PASSWORD <span style="color: var(--primary);">*</span></label>
+                                <input type="password" id="regPasswordInput" class="hud-input" placeholder="Min. 3 characters" required autocomplete="new-password">
+                            </div>
+                            <div class="form-group">
+                                <label>CONFIRM PIN / PASSWORD <span style="color: var(--primary);">*</span></label>
+                                <input type="password" id="regPasswordConfirmInput" class="hud-input" placeholder="Confirm password" required autocomplete="new-password">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-main); font-size: 0.85rem;">
+                                <input type="checkbox" id="regMigrateDataCheck" checked style="accent-color: var(--primary); width: 18px; height: 18px;">
+                                <span>Copy current session directives, focus time, and exam history into this new account</span>
+                            </label>
+                        </div>
+
+                        <div id="regErrorAlert" style="display: none; margin-top: 10px;" class="alert-box alert-danger"></div>
+
+                        <button type="submit" class="btn-hud-primary" style="width: 100%; margin-top: 15px; padding: 12px;">
+                            <i data-lucide="user-plus"></i> INITIALIZE CADET ENROLLMENT
+                        </button>
+                    </form>
+                </div>
+
+                <!-- TAB 4: SIGN IN / UNLOCK -->
+                <div class="auth-view-tab" id="authTabLogin" style="display: none;">
+                    <form id="loginPilotForm" style="max-width: 480px; margin: 0 auto;">
+                        <div class="form-group">
+                            <label>PILOT USERNAME OR EMAIL <span style="color: var(--primary);">*</span></label>
+                            <input type="text" id="loginIdentifierInput" class="hud-input" placeholder="e.g. tony_stark" required autocomplete="username">
+                        </div>
+
+                        <div class="form-group">
+                            <label>SECURITY PIN / PASSWORD <span style="color: var(--primary);">*</span></label>
+                            <input type="password" id="loginPasswordInput" class="hud-input" placeholder="Enter PIN / Password" required autocomplete="current-password">
+                        </div>
+
+                        <div id="loginErrorAlert" style="display: none; margin-top: 10px;" class="alert-box alert-danger"></div>
+
+                        <button type="submit" class="btn-hud-primary" style="width: 100%; margin-top: 15px; padding: 12px;">
+                            <i data-lucide="log-in"></i> AUTHENTICATE PILOT SESSION
+                        </button>
+
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button type="button" class="btn-link-hud" id="loginGoToRegisterBtn">
+                                Don't have an account yet? Enroll New Pilot &rarr;
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- TAB 5: DATA BACKUP & SYNC -->
+                <div class="auth-view-tab" id="authTabBackup" style="display: none;">
+                    <div class="backup-grid">
+                        <div class="backup-card">
+                            <div class="backup-card-icon"><i data-lucide="download"></i></div>
+                            <h4>EXPORT PILOT ARCHIVE</h4>
+                            <p>Download your complete profile, directives matrix, daily streak, step-evaluated exams, and vault metadata as an encrypted/JSON <code>.studx</code> file.</p>
+                            <button class="btn-hud-primary" id="exportDataBtn" style="width: 100%; margin-top: 12px;">
+                                <i data-lucide="download"></i> DOWNLOAD .STUDX ARCHIVE
+                            </button>
+                        </div>
+
+                        <div class="backup-card">
+                            <div class="backup-card-icon"><i data-lucide="upload"></i></div>
+                            <h4>RESTORE / IMPORT ARCHIVE</h4>
+                            <p>Import an existing <code>.studx</code> or JSON pilot archive to restore all your telemetry and directives instantly on this browser.</p>
+                            <input type="file" id="importBackupFileInput" accept=".studx,.json" style="display: none;">
+                            <button class="btn-hud-secondary" id="triggerImportBtn" style="width: 100%; margin-top: 12px;">
+                                <i data-lucide="upload"></i> SELECT ARCHIVE FILE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUD Loading Overlay -->
+    <div class="hud-loading-overlay" id="examLoadingOverlay">
+        <div class="loading-spinner"></div>
+        <h3 style="font-family: var(--font-hud); letter-spacing: 2px; color: var(--primary);" id="examLoadingProgress">
+            PARSING QUESTION PAPER...
+        </h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Extracting requested page range and setting up step rubrics</p>
+    </div>
+
+    <!-- App Logic Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/pdf-parser.js"></script>
+    <script src="js/vault.js"></script>
+    <script src="js/exam.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
